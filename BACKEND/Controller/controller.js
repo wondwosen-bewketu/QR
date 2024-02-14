@@ -33,7 +33,8 @@ exports.scanQRCode = async (req, res) => {
 
     // Calculate percentage of shares
     const totalSharesConstant = 8886; // Update this value with your total shares constant
-    qrInfo.percentageOfShares = (qrInfo.totalScans / totalSharesConstant) * 100;
+    qrInfo.percentageOfShares =
+      (qrInfo.totalShares / totalSharesConstant) * 100;
 
     await qrInfo.save();
 
@@ -67,7 +68,7 @@ exports.getQRInfo = async (req, res) => {
 
     if (totalShares > 0) {
       const totalSharesConstant = 8886; // Update this value with your total shares constant
-      totalPercentageOfShares = (totalScans / totalSharesConstant) * 100;
+      totalPercentageOfShares = (totalShares / totalSharesConstant) * 100;
     }
 
     const qrData = {
