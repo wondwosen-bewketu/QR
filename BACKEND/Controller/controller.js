@@ -31,10 +31,15 @@ exports.scanQRCode = async (req, res) => {
       qrInfo.totalAmountPaid += totalAmountPaid;
     }
 
-    // Calculate percentage of shares
-    const totalSharesConstant = 8886; // Update this value with your total shares constant
-    qrInfo.percentageOfShares =
-      (qrInfo.totalShares / totalSharesConstant) * 100;
+    // Calculate total shares constant
+    let totalSharesConstant = 0;
+    const documents = await Document.find();
+    if (documents) {
+      totalSharesConstant = documents.reduce(
+        (total, doc) => total + parseFloat(doc.signedNoOfShare || 0),
+        0
+      );
+    }
 
     await qrInfo.save();
 
@@ -55,6 +60,16 @@ exports.getQRInfo = async (req, res) => {
       return res.status(404).json({ error: "No QR codes found" });
     }
 
+    // Calculate total shares constant
+    let totalSharesConstant = 0;
+    const documents = await Document.find();
+    if (documents) {
+      totalSharesConstant = documents.reduce(
+        (total, doc) => total + parseFloat(doc.signedNoOfShare || 0),
+        0
+      );
+    }
+    
     let totalScans = 0;
     let totalShares = 0;
     let totalAmountPaid = 0;
@@ -66,8 +81,7 @@ exports.getQRInfo = async (req, res) => {
       totalAmountPaid += qrInfo.totalAmountPaid;
     });
 
-    if (totalShares > 0) {
-      const totalSharesConstant = 8886; // Update this value with your total shares constant
+    if (totalSharesConstant > 0) {
       totalPercentageOfShares = (totalShares / totalSharesConstant) * 100;
     }
 
@@ -76,6 +90,7 @@ exports.getQRInfo = async (req, res) => {
       totalShares,
       totalAmountPaid,
       totalPercentageOfShares,
+      totalSharesConstant, // Include total shares constant in the response
     };
 
     res.status(200).json({ qrData });
